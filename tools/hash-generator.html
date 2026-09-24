@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Hash Generator - SHA-256 &amp; SHA-512 Online</title>
+<meta name="description" content="Generate SHA-256 and SHA-512 hashes of any text for free. Verify file integrity, hash passwords for development, and more — no sign-up, runs in your browser.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Hash Generator</p>
+  <div class="tool-head">
+    <h1>Free Hash Generator — SHA-256 &amp; SHA-512</h1>
+    <p>Compute cryptographic hashes of any text instantly. Useful for checksums, development, and verification.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="input">Text to hash</label>
+    <textarea id="input" placeholder="Type or paste text here…"></textarea>
+    <div class="row">
+      <button class="btn primary" id="hash">Generate Hashes</button>
+    </div>
+    <div id="msg"></div>
+    <div id="results" class="hidden">
+      <label>SHA-256</label>
+      <div class="output" id="sha256"></div>
+      <div class="row"><button class="btn small" data-copy data-copy-target="#sha256">Copy SHA-256</button></div>
+      <label>SHA-512</label>
+      <div class="output" id="sha512"></div>
+      <div class="row"><button class="btn small" data-copy data-copy-target="#sha512">Copy SHA-512</button></div>
+    </div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to generate a hash</h2>
+    <p>Paste or type your text into the box and click <strong>Generate Hashes</strong>. You'll instantly get both the SHA-256 and SHA-512 digests, each with a one-click copy button.</p>
+    <h2>What is a hash used for?</h2>
+    <p>A cryptographic hash turns any input into a fixed-length fingerprint. Developers use hashes to verify file integrity (compare a downloaded file's hash against the published one), store password verifications without keeping the password itself, generate checksums for data pipelines, and create deterministic IDs from content. SHA-256 produces a 64-character hex string; SHA-512 produces a 128-character one with a larger security margin.</p>
+    <h2>Is it safe to hash sensitive text here?</h2>
+    <p>Hashing happens locally with the Web Crypto API (<code>crypto.subtle.digest</code>) — your text never leaves your browser. One caution that applies everywhere: never use a plain fast hash like SHA-256 alone to <em>store</em> real user passwords; production password storage needs a slow, salted algorithm like bcrypt, scrypt, or Argon2.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="password-generator.html">Password Generator</a></li>
+      <li><a href="uuid-generator.html">UUID Generator</a></li>
+      <li><a href="json-formatter.html">JSON Formatter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  function hex(buffer) {
+    return Array.prototype.map.call(new Uint8Array(buffer), function (b) {
+      return ('0' + b.toString(16)).slice(-2);
+    }).join('');
+  }
+
+  document.getElementById('hash').addEventListener('click', function () {
+    var text = document.getElementById('input').value;
+    if (!text) { window.flash('Enter some text to hash.', false); return; }
+    if (!window.crypto || !window.crypto.subtle) {
+      window.flash('Web Crypto is not available. Use a modern browser over HTTPS.', false);
+      return;
+    }
+    var data = new TextEncoder().encode(text);
+    Promise.all([
+      window.crypto.subtle.digest('SHA-256', data),
+      window.crypto.subtle.digest('SHA-512', data)
+    ]).then(function (hashes) {
+      document.getElementById('sha256').textContent = hex(hashes[0]);
+      document.getElementById('sha512').textContent = hex(hashes[1]);
+      document.getElementById('results').classList.remove('hidden');
+      window.flash('Hashes computed!', true);
+    }).catch(function () { window.flash('Hashing failed. Try again.', false); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Image Compressor - Reduce JPG, PNG &amp; WebP Size Online</title>
+<meta name="description" content="Compress JPG, PNG, and WebP images for free with an adjustable quality slider. Reduce file size instantly — no sign-up, files stay on your device.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Image Compressor</p>
+  <div class="tool-head">
+    <h1>Free Image Compressor</h1>
+    <p>Shrink your image file size with a quality slider. Compare before and after, then download the optimized file.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="file">1. Choose an image</label>
+    <input type="file" id="file" accept="image/*">
+    <label for="format">2. Output format</label>
+    <select id="format">
+      <option value="image/jpeg">JPG (best compression)</option>
+      <option value="image/webp">WebP (smallest files)</option>
+      <option value="image/png">PNG (lossless)</option>
+    </select>
+    <label for="quality">3. Quality: <span id="qval">80</span>%</label>
+    <input type="range" id="quality" min="10" max="100" value="80">
+    <div class="row">
+      <button class="btn primary" id="compress">Compress &amp; Download</button>
+    </div>
+    <div id="msg"></div>
+    <div class="hidden" id="result">
+      <p><span class="stat" id="origSize"></span><span class="stat" id="newSize"></span><span class="stat" id="saved"></span></p>
+      <img class="preview" id="preview" alt="Compressed image preview">
+    </div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to compress an image</h2>
+    <p>Pick an image, choose an output format, drag the quality slider to your preferred balance of size and quality, then click <strong>Compress &amp; Download</strong>. You'll see the original size, compressed size, and exactly how much you saved before downloading.</p>
+    <h2>How much quality should I use?</h2>
+    <p>For most web photos, a quality setting of <strong>75–85%</strong> is the sweet spot: files shrink dramatically (often 60–80% smaller) with quality loss that's invisible to the naked eye. Below 60% you'll start to notice artifacts in detailed photos, but it's fine for thumbnails and previews. PNG output is lossless, so the slider mainly affects JPG and WebP results — choose PNG when you need pixel-perfect quality, such as screenshots or graphics with text.</p>
+    <h2>Why compress images?</h2>
+    <p>Large images slow down websites, eat mobile data, and hit email attachment limits. Compressing before uploading is the single easiest way to speed up a website, and search engines reward fast pages. Because this tool runs entirely in your browser, compression is instant and your images are never uploaded anywhere — a big advantage over server-based compressors that queue your files and keep copies.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="image-converter.html">Image Converter</a></li>
+      <li><a href="qr-generator.html">QR Code Generator</a></li>
+      <li><a href="hash-generator.html">Hash Generator</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var fileInput = document.getElementById('file');
+  var formatSel = document.getElementById('format');
+  var quality = document.getElementById('quality');
+  var qval = document.getElementById('qval');
+  var result = document.getElementById('result');
+  var preview = document.getElementById('preview');
+
+  quality.addEventListener('input', function () { qval.textContent = quality.value; });
+
+  document.getElementById('compress').addEventListener('click', function () {
+    var file = fileInput.files[0];
+    if (!file) { window.flash('Please choose an image first.', false); return; }
+    var type = formatSel.value;
+    var q = parseInt(quality.value, 10) / 100;
+    window.readFileAsDataURL(file)
+      .then(window.loadImage)
+      .then(function (img) {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        var ctx = canvas.getContext('2d');
+        if (type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        ctx.drawImage(img, 0, 0);
+        return new Promise(function (resolve, reject) {
+          canvas.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error('Compression failed. Try a different format.')); }, type, q);
+        });
+      })
+      .then(function (blob) {
+        var ext = type === 'image/png' ? 'png' : (type === 'image/jpeg' ? 'jpg' : 'webp');
+        var base = file.name.replace(/\.[^.]+$/, '') || 'image';
+        window.downloadBlob(blob, base + '-compressed.' + ext);
+        var savedPct = Math.round((1 - blob.size / file.size) * 100);
+        document.getElementById('origSize').textContent = 'Original: ' + window.formatBytes(file.size);
+        document.getElementById('newSize').textContent = 'Compressed: ' + window.formatBytes(blob.size);
+        document.getElementById('saved').textContent = 'Saved: ' + savedPct + '%';
+        preview.src = URL.createObjectURL(blob);
+        result.classList.remove('hidden');
+        window.flash('Compressed! Your download has started.', true);
+      })
+      .catch(function (err) { window.flash(err.message, false); });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Text Tools - Case Converter, Word Counter &amp; Text Cleaner</title>
+<meta name="description" content="Free text tools: convert case (upper, lower, title, sentence), count words & characters, and remove extra spaces. No sign-up, runs in your browser.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Text Tools</p>
+  <div class="tool-head">
+    <h1>Free Text Tools — Case Converter &amp; Word Counter</h1>
+    <p>Change text case, count words and characters live, and clean up messy whitespace in one place.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="input">Your text</label>
+    <textarea id="input" placeholder="Type or paste your text here…"></textarea>
+    <p>
+      <span class="stat" id="chars">0 characters</span>
+      <span class="stat" id="words">0 words</span>
+      <span class="stat" id="lines">0 lines</span>
+      <span class="stat" id="sentences">0 sentences</span>
+    </p>
+    <label>Convert case</label>
+    <div class="row">
+      <button class="btn" data-case="upper">UPPERCASE</button>
+      <button class="btn" data-case="lower">lowercase</button>
+      <button class="btn" data-case="title">Title Case</button>
+      <button class="btn" data-case="sentence">Sentence case</button>
+      <button class="btn" data-case="camel">camelCase</button>
+      <button class="btn" data-case="snake">snake_case</button>
+    </div>
+    <label>Clean up</label>
+    <div class="row">
+      <button class="btn" id="trimSpaces">Remove extra spaces</button>
+      <button class="btn" id="trimLines">Remove empty lines</button>
+      <button class="btn" id="clear">Clear</button>
+      <button class="btn primary" data-copy data-copy-target="#input">Copy Text</button>
+    </div>
+    <div id="msg"></div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to use the text tools</h2>
+    <p>Paste your text and watch the live counters update as you type: characters, words, lines, and sentences. Click any case button to transform the whole text instantly, or use the clean-up buttons to remove extra spaces and blank lines before copying the result.</p>
+    <h2>When is each case style useful?</h2>
+    <p><strong>UPPERCASE</strong> works for headings and emphasis; <strong>lowercase</strong> for normalizing data; <strong>Title Case</strong> for headlines and book titles; <strong>Sentence case</strong> for fixing text pasted from caps-lock accidents. Developers will reach for <strong>camelCase</strong> (JavaScript variables) and <strong>snake_case</strong> (Python variables, database fields) constantly.</p>
+    <h2>Why count words and characters?</h2>
+    <p>Word and character counts matter everywhere: social media bios, meta descriptions (around 155 characters for SEO), essays with word limits, SMS segments, and resume bullet points. Live counting means you can edit and watch the numbers update without re-pasting into another tool. Like every tool here, all processing happens in your browser — your text is never uploaded.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="json-formatter.html">JSON Formatter</a></li>
+      <li><a href="text-to-speech.html">Text to Speech</a></li>
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var input = document.getElementById('input');
+
+  function updateStats() {
+    var t = input.value;
+    var words = t.trim() ? t.trim().split(/\s+/).length : 0;
+    var lines = t ? t.split('\n').length : 0;
+    var sentences = t.trim() ? (t.match(/[^.!?]+[.!?]+/g) || []).length : 0;
+    document.getElementById('chars').textContent = t.length + ' characters';
+    document.getElementById('words').textContent = words + ' words';
+    document.getElementById('lines').textContent = lines + ' lines';
+    document.getElementById('sentences').textContent = sentences + ' sentences';
+  }
+  input.addEventListener('input', updateStats);
+
+  function wordsOf(t) { return t.trim().split(/\s+/).filter(Boolean); }
+
+  var cases = {
+    upper: function (t) { return t.toUpperCase(); },
+    lower: function (t) { return t.toLowerCase(); },
+    title: function (t) { return t.toLowerCase().replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); }); },
+    sentence: function (t) {
+      return t.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, function (c) { return c.toUpperCase(); });
+    },
+    camel: function (t) {
+      var w = wordsOf(t.toLowerCase());
+      return w.map(function (x, i) { return i === 0 ? x : x.charAt(0).toUpperCase() + x.slice(1); }).join('');
+    },
+    snake: function (t) { return wordsOf(t.toLowerCase()).join('_'); }
+  };
+
+  document.querySelectorAll('[data-case]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!input.value) { window.flash('Enter some text first.', false); return; }
+      input.value = cases[btn.getAttribute('data-case')](input.value);
+      updateStats();
+      window.flash('Case converted!', true);
+    });
+  });
+
+  document.getElementById('trimSpaces').addEventListener('click', function () {
+    input.value = input.value.replace(/[ \t]+/g, ' ').replace(/^[ \t]+|[ \t]+$/gm, '');
+    updateStats(); window.flash('Extra spaces removed!', true);
+  });
+  document.getElementById('trimLines').addEventListener('click', function () {
+    input.value = input.value.split('\n').filter(function (l) { return l.trim() !== ''; }).join('\n');
+    updateStats(); window.flash('Empty lines removed!', true);
+  });
+  document.getElementById('clear').addEventListener('click', function () {
+    input.value = ''; updateStats();
+  });
+  updateStats();
+})();
+</script>
+</body>
+</html>

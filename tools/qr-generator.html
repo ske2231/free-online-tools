@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free QR Code Generator - Create QR Codes Instantly</title>
+<meta name="description" content="Generate free QR codes for URLs, text, Wi-Fi credentials, and contact info. Download as PNG — no sign-up, no watermark, works offline.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › QR Code Generator</p>
+  <div class="tool-head">
+    <h1>Free QR Code Generator</h1>
+    <p>Create QR codes for links, text, Wi-Fi logins, and vCards. Download as a crisp PNG — free forever.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="type">QR content type</label>
+    <select id="type">
+      <option value="text">Text / URL</option>
+      <option value="wifi">Wi-Fi network</option>
+      <option value="vcard">Contact (vCard)</option>
+    </select>
+    <div id="pane-text">
+      <label for="text">Text or URL</label>
+      <textarea id="text" placeholder="https://example.com"></textarea>
+    </div>
+    <div id="pane-wifi" class="hidden">
+      <label for="ssid">Network name (SSID)</label>
+      <input type="text" id="ssid" placeholder="MyWiFi">
+      <label for="wifipass">Password</label>
+      <input type="text" id="wifipass" placeholder="wifi-password">
+      <label for="wifisec">Security</label>
+      <select id="wifisec"><option>WPA</option><option>WEP</option><option>nopass</option></select>
+    </div>
+    <div id="pane-vcard" class="hidden">
+      <label for="vname">Name</label>
+      <input type="text" id="vname" placeholder="Jane Doe">
+      <label for="vphone">Phone</label>
+      <input type="text" id="vphone" placeholder="+1 555 0100">
+      <label for="vemail">Email</label>
+      <input type="text" id="vemail" placeholder="jane@example.com">
+    </div>
+    <label for="size">Size (px)</label>
+    <select id="size"><option>256</option><option selected>512</option><option>1024</option></select>
+    <div class="row">
+      <button class="btn primary" id="generate">Generate QR Code</button>
+      <button class="btn hidden" id="download">Download PNG</button>
+    </div>
+    <div id="msg"></div>
+    <div class="hidden" id="result" style="text-align:center;margin-top:16px;">
+      <div id="qr" style="display:inline-block;background:#fff;padding:12px;border:1px solid var(--border);border-radius:8px;"></div>
+    </div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to make a QR code</h2>
+    <p>Choose a content type — plain text or URL, Wi-Fi network, or contact card — fill in the fields, and click <strong>Generate QR Code</strong>. Then download the result as a high-resolution PNG for print or digital use. It's that simple, and there's no limit on how many you create.</p>
+    <h2>What can QR codes contain?</h2>
+    <p>QR codes can encode URLs, plain text, Wi-Fi credentials (so guests join your network by scanning), vCard contact details, and more. Restaurants use them for menus, businesses for payment links and reviews, and events for Wi-Fi access. Our generator formats Wi-Fi and vCard payloads to the standard syntax, so they work with any phone camera.</p>
+    <h2>Do these QR codes expire?</h2>
+    <p>No. These are <strong>static</strong> QR codes — the data is encoded directly in the pattern, not on a tracking server. They never expire, can't be deactivated, and don't track scans. Many "free" QR generators use dynamic codes that stop working unless you pay; ours work forever because there's nothing to bill you for. The QR library also runs locally in your browser, so your content is never sent to a server.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="image-converter.html">Image Converter</a></li>
+      <li><a href="text-to-speech.html">Text to Speech</a></li>
+      <li><a href="password-generator.html">Password Generator</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var typeSel = document.getElementById('type');
+  var panes = { text: 'pane-text', wifi: 'pane-wifi', vcard: 'pane-vcard' };
+  var qrBox = document.getElementById('qr');
+  var result = document.getElementById('result');
+  var dlBtn = document.getElementById('download');
+  var lastPayload = '';
+
+  typeSel.addEventListener('change', function () {
+    Object.keys(panes).forEach(function (k) {
+      document.getElementById(panes[k]).classList.toggle('hidden', k !== typeSel.value);
+    });
+  });
+
+  function escapeWifi(s) { return String(s).replace(/([\\;,":])/g, '\\$1'); }
+
+  function buildPayload() {
+    var t = typeSel.value;
+    if (t === 'wifi') {
+      var ssid = document.getElementById('ssid').value.trim();
+      var pass = document.getElementById('wifipass').value;
+      var sec = document.getElementById('wifisec').value;
+      if (!ssid) return null;
+      return 'WIFI:T:' + sec + ';S:' + escapeWifi(ssid) + ';P:' + escapeWifi(pass) + ';;';
+    }
+    if (t === 'vcard') {
+      var name = document.getElementById('vname').value.trim();
+      if (!name) return null;
+      return 'BEGIN:VCARD\nVERSION:3.0\nFN:' + name +
+        '\nTEL:' + document.getElementById('vphone').value.trim() +
+        '\nEMAIL:' + document.getElementById('vemail').value.trim() + '\nEND:VCARD';
+    }
+    var text = document.getElementById('text').value.trim();
+    return text || null;
+  }
+
+  document.getElementById('generate').addEventListener('click', function () {
+    if (typeof QRCode === 'undefined') {
+      window.flash('QR library failed to load. Check your connection and reload.', false);
+      return;
+    }
+    lastPayload = buildPayload();
+    if (!lastPayload) { window.flash('Please fill in the required fields.', false); return; }
+    var size = parseInt(document.getElementById('size').value, 10);
+    qrBox.innerHTML = '';
+    try {
+      new QRCode(qrBox, { text: lastPayload, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+    } catch (e) {
+      window.flash('Content too long for a QR code. Try shorter text.', false);
+      return;
+    }
+    result.classList.remove('hidden');
+    dlBtn.classList.remove('hidden');
+    window.flash('QR code generated!', true);
+  });
+
+  dlBtn.addEventListener('click', function () {
+    var canvas = qrBox.querySelector('canvas');
+    var img = qrBox.querySelector('img');
+    if (canvas) {
+      canvas.toBlob(function (blob) { window.downloadBlob(blob, 'qr-code.png'); });
+    } else if (img && img.src) {
+      window.loadImage(img.src).then(function (im) {
+        var c = document.createElement('canvas');
+        c.width = im.naturalWidth; c.height = im.naturalHeight;
+        c.getContext('2d').drawImage(im, 0, 0);
+        c.toBlob(function (blob) { window.downloadBlob(blob, 'qr-code.png'); });
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>

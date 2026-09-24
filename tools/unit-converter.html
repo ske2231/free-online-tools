@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Unit Converter - Length, Weight &amp; Temperature</title>
+<meta name="description" content="Free unit converter for length, weight, and temperature. Convert miles to km, pounds to kg, Fahrenheit to Celsius and more — no sign-up, instant results.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Unit Converter</p>
+  <div class="tool-head">
+    <h1>Free Unit Converter</h1>
+    <p>Convert length, weight, and temperature units instantly. Results update live as you type.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="category">Category</label>
+    <select id="category">
+      <option value="length">Length</option>
+      <option value="weight">Weight</option>
+      <option value="temp">Temperature</option>
+    </select>
+    <label for="value">Value</label>
+    <input type="number" id="value" value="1" step="any">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;">
+      <div>
+        <label for="from">From</label>
+        <select id="from"></select>
+      </div>
+      <button class="btn small" id="swap" title="Swap units" style="margin-bottom:2px;">⇄</button>
+      <div>
+        <label for="to">To</label>
+        <select id="to"></select>
+      </div>
+    </div>
+    <div class="output" id="result" aria-live="polite" style="font-size:1.2rem;"></div>
+    <div id="msg"></div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to convert units</h2>
+    <p>Choose a category (length, weight, or temperature), type a value, and pick your "from" and "to" units. The result updates live as you type — hit the ⇄ button to swap the direction instantly.</p>
+    <h2>Supported conversions</h2>
+    <p><strong>Length:</strong> millimeters, centimeters, meters, kilometers, inches, feet, yards, and miles — handy for recipes, DIY projects, and travel. <strong>Weight:</strong> grams, kilograms, ounces, pounds, and tons — useful for cooking, fitness, and shipping. <strong>Temperature:</strong> Celsius, Fahrenheit, and Kelvin — for weather, cooking, and science homework.</p>
+    <h2>Why a unit converter?</h2>
+    <p>Recipes from another country, product specs in unfamiliar units, weather reports while traveling — unit mismatches come up daily. This converter uses exact conversion factors and shows results to a sensible precision, so you get trustworthy answers without ads, pop-ups, or a calculator app.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="text-tools.html">Text Tools</a></li>
+      <li><a href="json-formatter.html">JSON Formatter</a></li>
+      <li><a href="image-converter.html">Image Converter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var UNITS = {
+    length: { base: 'm', units: { mm: 0.001, cm: 0.01, m: 1, km: 1000, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344 } },
+    weight: { base: 'g', units: { g: 1, kg: 1000, oz: 28.349523125, lb: 453.59237, t: 1000000 } },
+    temp: { base: 'c', units: { c: 'celsius', f: 'fahrenheit', k: 'kelvin' } }
+  };
+  var LABELS = {
+    mm: 'Millimeters (mm)', cm: 'Centimeters (cm)', m: 'Meters (m)', km: 'Kilometers (km)',
+    in: 'Inches (in)', ft: 'Feet (ft)', yd: 'Yards (yd)', mi: 'Miles (mi)',
+    g: 'Grams (g)', kg: 'Kilograms (kg)', oz: 'Ounces (oz)', lb: 'Pounds (lb)', t: 'Metric tons (t)',
+    c: 'Celsius (°C)', f: 'Fahrenheit (°F)', k: 'Kelvin (K)'
+  };
+  var catSel = document.getElementById('category');
+  var valEl = document.getElementById('value');
+  var fromSel = document.getElementById('from');
+  var toSel = document.getElementById('to');
+  var result = document.getElementById('result');
+
+  function toCelsius(v, u) {
+    if (u === 'c') return v;
+    if (u === 'f') return (v - 32) * 5 / 9;
+    return v - 273.15;
+  }
+  function fromCelsius(v, u) {
+    if (u === 'c') return v;
+    if (u === 'f') return v * 9 / 5 + 32;
+    return v + 273.15;
+  }
+
+  function convert() {
+    var cat = catSel.value;
+    var v = parseFloat(valEl.value);
+    var from = fromSel.value, to = toSel.value;
+    if (isNaN(v)) { result.textContent = 'Enter a number.'; return; }
+    var out;
+    if (cat === 'temp') {
+      out = fromCelsius(toCelsius(v, from), to);
+    } else {
+      var units = UNITS[cat].units;
+      out = v * units[from] / units[to];
+    }
+    var rounded = Math.abs(out) >= 1000 ? out.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      : parseFloat(out.toPrecision(6)).toString();
+    result.textContent = valEl.value + ' ' + LABELS[from] + ' = ' + rounded + ' ' + LABELS[to];
+  }
+
+  function fillUnits() {
+    var cat = catSel.value;
+    var keys = Object.keys(UNITS[cat].units);
+    fromSel.innerHTML = ''; toSel.innerHTML = '';
+    keys.forEach(function (k) {
+      var o1 = document.createElement('option'); o1.value = k; o1.textContent = LABELS[k]; fromSel.appendChild(o1);
+      var o2 = document.createElement('option'); o2.value = k; o2.textContent = LABELS[k]; toSel.appendChild(o2);
+    });
+    fromSel.selectedIndex = 0;
+    toSel.selectedIndex = Math.min(1, keys.length - 1);
+    convert();
+  }
+
+  catSel.addEventListener('change', fillUnits);
+  valEl.addEventListener('input', convert);
+  fromSel.addEventListener('change', convert);
+  toSel.addEventListener('change', convert);
+  document.getElementById('swap').addEventListener('click', function () {
+    var tmp = fromSel.value; fromSel.value = toSel.value; toSel.value = tmp; convert();
+  });
+
+  fillUnits();
+})();
+</script>
+</body>
+</html>

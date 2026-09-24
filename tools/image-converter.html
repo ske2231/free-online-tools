@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free JPG to PNG Converter - No Sign Up Required</title>
+<meta name="description" content="Convert images between JPG, PNG, and WebP for free. Fast, private, and no sign-up — your files never leave your browser.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Image Converter</p>
+  <div class="tool-head">
+    <h1>Free Image Converter — JPG, PNG &amp; WebP</h1>
+    <p>Convert your images between JPG, PNG, and WebP right in your browser. No upload, no watermark, no sign-up.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="file">1. Choose an image</label>
+    <input type="file" id="file" accept="image/*">
+    <label for="format">2. Pick output format</label>
+    <select id="format">
+      <option value="image/png">PNG</option>
+      <option value="image/jpeg">JPG</option>
+      <option value="image/webp">WebP</option>
+    </select>
+    <div class="row">
+      <button class="btn primary" id="convert">Convert &amp; Download</button>
+    </div>
+    <div id="msg"></div>
+    <div class="hidden" id="result">
+      <p><span class="stat" id="origSize"></span><span class="stat" id="newSize"></span></p>
+      <img class="preview" id="preview" alt="Converted image preview">
+    </div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to convert an image</h2>
+    <p>Converting an image takes three steps: choose a file from your device, select the output format (PNG, JPG, or WebP), and click <strong>Convert &amp; Download</strong>. The converted file downloads straight to your device — no waiting in a queue, no email verification, no account.</p>
+    <h2>Which format should you choose?</h2>
+    <p><strong>PNG</strong> is lossless and supports transparency, making it ideal for logos, screenshots, and graphics with sharp edges. <strong>JPG</strong> uses lossy compression that keeps file sizes small, which is great for photographs and web images where tiny quality loss is invisible. <strong>WebP</strong> is the modern best of both worlds: it typically produces files 25–35% smaller than JPG or PNG at the same visual quality, and it supports transparency too. Most modern browsers and apps now support WebP.</p>
+    <h2>Private by design</h2>
+    <p>Unlike most online converters, this tool never uploads your images to a server. The conversion happens entirely inside your browser using the HTML canvas element. That means your photos stay on your device, the tool works even with sensitive images, and conversion is instant — there's no upload time at all.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="image-compressor.html">Image Compressor</a></li>
+      <li><a href="qr-generator.html">QR Code Generator</a></li>
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var fileInput = document.getElementById('file');
+  var formatSel = document.getElementById('format');
+  var result = document.getElementById('result');
+  var preview = document.getElementById('preview');
+
+  document.getElementById('convert').addEventListener('click', function () {
+    var file = fileInput.files[0];
+    if (!file) { window.flash('Please choose an image first.', false); return; }
+    var type = formatSel.value;
+    window.readFileAsDataURL(file)
+      .then(window.loadImage)
+      .then(function (img) {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        var ctx = canvas.getContext('2d');
+        if (type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        ctx.drawImage(img, 0, 0);
+        return new Promise(function (resolve, reject) {
+          canvas.toBlob(function (blob) { blob ? resolve(blob) : reject(new Error('Conversion failed. Try a different format.')); }, type, 0.92);
+        });
+      })
+      .then(function (blob) {
+        var ext = type === 'image/png' ? 'png' : (type === 'image/jpeg' ? 'jpg' : 'webp');
+        var base = file.name.replace(/\.[^.]+$/, '') || 'image';
+        window.downloadBlob(blob, base + '-converted.' + ext);
+        document.getElementById('origSize').textContent = 'Original: ' + window.formatBytes(file.size);
+        document.getElementById('newSize').textContent = 'Converted: ' + window.formatBytes(blob.size);
+        preview.src = URL.createObjectURL(blob);
+        result.classList.remove('hidden');
+        window.flash('Converted! Your download has started.', true);
+      })
+      .catch(function (err) { window.flash(err.message, false); });
+  });
+})();
+</script>
+</body>
+</html>

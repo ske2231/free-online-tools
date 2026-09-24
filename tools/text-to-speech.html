@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Text to Speech - Read Text Aloud Online</title>
+<meta name="description" content="Free text-to-speech reader. Paste any text and listen with adjustable voice, speed, and pitch — no sign-up, works in your browser.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › Text to Speech</p>
+  <div class="tool-head">
+    <h1>Free Text to Speech Reader</h1>
+    <p>Paste any text and hear it read aloud. Choose a voice, adjust speed and pitch — free, no sign-up.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="input">Text to read aloud</label>
+    <textarea id="input" placeholder="Paste an article, email, or any text here…" style="min-height:140px;"></textarea>
+    <label for="voice">Voice</label>
+    <select id="voice"><option>Loading voices…</option></select>
+    <label for="rate">Speed: <span id="rval">1.0</span>×</label>
+    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+    <label for="pitch">Pitch: <span id="pval">1.0</span></label>
+    <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1">
+    <div class="row">
+      <button class="btn primary" id="speak">▶ Speak</button>
+      <button class="btn" id="pause">⏸ Pause / Resume</button>
+      <button class="btn" id="stop">⏹ Stop</button>
+    </div>
+    <div id="msg"></div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to use text to speech</h2>
+    <p>Paste your text, pick a voice from the dropdown, optionally adjust the speed and pitch sliders, then click <strong>Speak</strong>. Use Pause/Resume to take a break and Stop to end playback. Reading happens with your device's built-in voices, so quality varies by browser and operating system.</p>
+    <h2>What is text to speech good for?</h2>
+    <p>Proofreading is the killer use case: hearing your writing read aloud catches typos, awkward phrasing, and missing words that your eyes skip over. It's also great for accessibility, multitasking (listen to articles while cooking), language learning (hear correct pronunciation), and giving tired eyes a rest during long reading sessions.</p>
+    <h2>Is my text private?</h2>
+    <p>Yes. This tool uses the Web Speech API built into your browser (<code>speechSynthesis</code>), so your text is processed locally on your device and never uploaded to a server. Note that some browsers download higher-quality voices on demand; if your browser offers no voices, try Chrome or Edge on desktop.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="text-tools.html">Text Tools</a></li>
+      <li><a href="qr-generator.html">QR Code Generator</a></li>
+      <li><a href="unit-converter.html">Unit Converter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var synth = window.speechSynthesis;
+  var voiceSel = document.getElementById('voice');
+  var rateEl = document.getElementById('rate');
+  var pitchEl = document.getElementById('pitch');
+
+  if (!synth) {
+    window.flash('Text-to-speech is not supported in this browser. Try Chrome or Edge.', false);
+    document.getElementById('speak').disabled = true;
+    return;
+  }
+
+  rateEl.addEventListener('input', function () { document.getElementById('rval').textContent = rateEl.value; });
+  pitchEl.addEventListener('input', function () { document.getElementById('pval').textContent = pitchEl.value; });
+
+  function loadVoices() {
+    var voices = synth.getVoices();
+    if (!voices.length) return;
+    voiceSel.innerHTML = '';
+    voices.forEach(function (v, i) {
+      var o = document.createElement('option');
+      o.value = i;
+      o.textContent = v.name + ' (' + v.lang + ')';
+      if (v.default) o.textContent += ' — default';
+      voiceSel.appendChild(o);
+    });
+    var en = voices.findIndex(function (v) { return v.lang && v.lang.toLowerCase().indexOf('en') === 0; });
+    if (en >= 0) voiceSel.value = en;
+  }
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
+
+  document.getElementById('speak').addEventListener('click', function () {
+    var text = document.getElementById('input').value.trim();
+    if (!text) { window.flash('Enter some text first.', false); return; }
+    synth.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    var voices = synth.getVoices();
+    if (voices.length && voiceSel.value !== '') u.voice = voices[parseInt(voiceSel.value, 10)];
+    u.rate = parseFloat(rateEl.value);
+    u.pitch = parseFloat(pitchEl.value);
+    u.onend = function () { window.flash('Finished reading.', true); };
+    u.onerror = function () { window.flash('Playback error. Try a different voice.', false); };
+    synth.speak(u);
+  });
+
+  document.getElementById('pause').addEventListener('click', function () {
+    if (synth.speaking) { synth.paused ? synth.resume() : synth.pause(); }
+  });
+  document.getElementById('stop').addEventListener('click', function () { synth.cancel(); });
+})();
+</script>
+</body>
+</html>

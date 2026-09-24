@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free UUID Generator - Generate Single or Bulk UUIDs (v4)</title>
+<meta name="description" content="Generate free UUID v4 identifiers — single or bulk. Perfect for databases, APIs, and apps. Cryptographically random, no sign-up, copy or download.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › UUID Generator</p>
+  <div class="tool-head">
+    <h1>Free UUID Generator (v4)</h1>
+    <p>Generate one UUID or thousands in bulk for databases, APIs, and applications.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="count">How many UUIDs? (1–10,000)</label>
+    <input type="number" id="count" min="1" max="10000" value="10">
+    <div class="opt-row"><input type="checkbox" id="uppercase"><label for="uppercase">Uppercase</label></div>
+    <div class="opt-row"><input type="checkbox" id="nohyphens"><label for="nohyphens">Remove hyphens</label></div>
+    <div class="row">
+      <button class="btn primary" id="generate">Generate</button>
+      <button class="btn" data-copy data-copy-target="#output">Copy All</button>
+      <button class="btn" id="download">Download .txt</button>
+    </div>
+    <div id="msg"></div>
+    <div class="output" id="output" aria-live="polite" style="max-height:300px;overflow:auto;"></div>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to generate UUIDs</h2>
+    <p>Enter how many UUIDs you need (up to 10,000), optionally toggle uppercase or hyphen-less output, and click <strong>Generate</strong>. Copy them all to the clipboard or download as a plain text file — one UUID per line — ready to import into a spreadsheet or script.</p>
+    <h2>What is a UUID?</h2>
+    <p>A UUID (Universally Unique Identifier) is a 128-bit label like <code>3f6b9c2a-7d1e-4f5a-9b3c-8e2a1d4f6b7c</code> used to uniquely identify records in databases, API resources, distributed systems, and files. Version 4 UUIDs are randomly generated, and with 2^122 possible values, the chance of two colliding is effectively zero — you don't need a central authority to hand them out.</p>
+    <h2>Are these UUIDs truly random?</h2>
+    <p>Yes. Each UUID is generated with <code>crypto.randomUUID()</code> (with a secure fallback for older browsers), which uses your operating system's cryptographically secure random number generator. Generation happens entirely in your browser, so nothing is sent to a server or reused.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="password-generator.html">Password Generator</a></li>
+      <li><a href="hash-generator.html">Hash Generator</a></li>
+      <li><a href="json-formatter.html">JSON Formatter</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var countEl = document.getElementById('count');
+  var output = document.getElementById('output');
+  var lastList = [];
+
+  function randomUUID() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    var arr = new Uint8Array(16);
+    window.crypto.getRandomValues(arr);
+    arr[6] = (arr[6] & 0x0f) | 0x40;
+    arr[8] = (arr[8] & 0x3f) | 0x80;
+    var hex = Array.prototype.map.call(arr, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
+  }
+
+  document.getElementById('generate').addEventListener('click', function () {
+    var n = parseInt(countEl.value, 10);
+    if (!n || n < 1) { window.flash('Enter a number of at least 1.', false); return; }
+    if (n > 10000) { window.flash('Maximum is 10,000 at a time.', false); return; }
+    var upper = document.getElementById('uppercase').checked;
+    var nohy = document.getElementById('nohyphens').checked;
+    lastList = [];
+    for (var i = 0; i < n; i++) {
+      var u = randomUUID();
+      if (upper) u = u.toUpperCase();
+      if (nohy) u = u.replace(/-/g, '');
+      lastList.push(u);
+    }
+    output.textContent = lastList.join('\n');
+    window.flash(n + ' UUID' + (n === 1 ? '' : 's') + ' generated!', true);
+  });
+
+  document.getElementById('download').addEventListener('click', function () {
+    if (!lastList.length) { window.flash('Generate UUIDs first.', false); return; }
+    window.downloadBlob(new Blob([lastList.join('\n')], { type: 'text/plain' }), 'uuids.txt');
+  });
+})();
+</script>
+</body>
+</html>

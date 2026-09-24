@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free JSON Formatter &amp; Validator - Beautify JSON Online</title>
+<meta name="description" content="Free JSON formatter, validator, and minifier. Beautify JSON with syntax validation and clear error messages — no sign-up, runs in your browser.">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- AdSense: paste code here (header) -->
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="../index.html">Free<span>Tools</span></a>
+    <nav class="main"><a href="../index.html#tools">All Tools</a><a href="../index.html#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="breadcrumb"><a href="../index.html">Home</a> › JSON Formatter</p>
+  <div class="tool-head">
+    <h1>Free JSON Formatter &amp; Validator</h1>
+    <p>Paste JSON to validate, beautify, or minify it. Clear error messages point you to the exact problem.</p>
+  </div>
+
+  <!-- AdSense: paste code here (above tool) -->
+
+  <div class="tool-box">
+    <label for="input">JSON input</label>
+    <textarea id="input" placeholder='{"name": "example", "items": [1, 2, 3]}' style="min-height:160px;font-family:ui-monospace,monospace;"></textarea>
+    <div class="row">
+      <button class="btn primary" id="format">Format / Beautify</button>
+      <button class="btn" id="minify">Minify</button>
+      <button class="btn" id="validate">Validate</button>
+      <button class="btn" data-copy data-copy-target="#output">Copy Result</button>
+    </div>
+    <div id="msg"></div>
+    <label for="output">Result</label>
+    <textarea id="output" readonly placeholder="Formatted JSON will appear here…" style="min-height:160px;font-family:ui-monospace,monospace;"></textarea>
+  </div>
+
+  <!-- AdSense: paste code here (below tool) -->
+
+  <div class="prose">
+    <h2>How to format JSON</h2>
+    <p>Paste your JSON into the input box and click <strong>Format / Beautify</strong> to get nicely indented, readable output. Use <strong>Minify</strong> to strip all whitespace for production payloads, or <strong>Validate</strong> to check syntax without changing anything. Copy the result with one click.</p>
+    <h2>Common JSON errors it catches</h2>
+    <p>Most JSON errors come from a handful of culprits: trailing commas after the last item, single quotes instead of double quotes, unquoted property names, comments (which JSON doesn't allow), or mismatched brackets. When validation fails, the tool reports the position of the problem so you can fix it fast instead of squinting at a wall of text.</p>
+    <h2>Why format JSON?</h2>
+    <p>APIs, config files, and logs all speak JSON, but machines don't care about readability — humans do. Beautified JSON makes debugging API responses dramatically easier, and minified JSON shrinks payloads for faster requests. Everything runs locally in your browser, so even JSON containing API keys or personal data never leaves your device.</p>
+  </div>
+
+  <div class="related">
+    <h2>Related Tools</h2>
+    <ul>
+      <li><a href="hash-generator.html">Hash Generator</a></li>
+      <li><a href="text-tools.html">Text Tools</a></li>
+      <li><a href="uuid-generator.html">UUID Generator</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer class="site">
+  <!-- AdSense: paste code here (footer) -->
+  <div class="wrap">
+    <div class="bottom">© 2026 FreeTools. <a href="../index.html">All free tools</a></div>
+  </div>
+</footer>
+<script src="../assets/tools.js"></script>
+<script>
+(function () {
+  'use strict';
+  var input = document.getElementById('input');
+  var output = document.getElementById('output');
+
+  function parse() {
+    var text = input.value.trim();
+    if (!text) { window.flash('Paste some JSON first.', false); return null; }
+    try { return JSON.parse(text); }
+    catch (e) {
+      var m = /position (\d+)/.exec(e.message);
+      var hint = m ? ' (near character ' + m[1] + ')' : '';
+      window.flash('Invalid JSON: ' + e.message + hint, false);
+      return null;
+    }
+  }
+
+  document.getElementById('format').addEventListener('click', function () {
+    var obj = parse();
+    if (obj === null || obj === undefined) return;
+    output.value = JSON.stringify(obj, null, 2);
+    window.flash('JSON formatted!', true);
+  });
+
+  document.getElementById('minify').addEventListener('click', function () {
+    var obj = parse();
+    if (obj === null || obj === undefined) return;
+    output.value = JSON.stringify(obj);
+    window.flash('JSON minified!', true);
+  });
+
+  document.getElementById('validate').addEventListener('click', function () {
+    var obj = parse();
+    if (obj === null || obj === undefined) return;
+    var type = Array.isArray(obj) ? 'array' : typeof obj;
+    window.flash('Valid JSON (' + type + ').', true);
+  });
+})();
+</script>
+</body>
+</html>
